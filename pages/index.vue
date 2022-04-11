@@ -13,14 +13,6 @@
               <option value="Perhiasan">Perhiasan</option>
             </select>
           </div>
-          <div class="d-flex align-items-center ms-auto">
-            <button
-              class="btn btn-outline-secondary py-1 px-3"
-              @click="hide = !hide"
-            >
-              {{ hide ? "Show" : "Hide" }}
-            </button>
-          </div>
 
           <div class="d-flex align-items-center ms-auto">
             <!-- /* Form input pencarian */ -->
@@ -108,39 +100,45 @@ export default {
           description: "ini Kategori Pakaian",
           isDone: false,
           category: "Pakaian",
+          isHide: false,
         },
         {
           title: "Celana",
           description: "ini Kategori Pakaian",
           isDone: false,
           category: "Pakaian",
+          isHide: false,
         },
         {
           title: "Jam Tangan",
           description: " ini Kategori Aksesoris",
           isDone: false,
           category: "Aksesoris",
+          isHide: false,
         },
         {
           title: "Gelang",
           description: "ini Kategori Aksesoris",
           isDone: false,
           category: "Aksesoris",
+          isHide: false,
         },
         {
           title: "Cincin",
           description: "ini Kategori Perhiasan",
           isDone: false,
           category: "Perhiasan",
+          isHidden: false,
         },
         {
           title: "kalung",
           description: " ini Kategori Perhiasan",
           isDone: false,
           category: "Perhiasan",
+          isHidden: false,
         },
       ],
-
+      isHide: false,
       isCreating: false,
       isGrid: false,
       hide: false,
@@ -161,6 +159,13 @@ export default {
             .toLowerCase()
             .split(" ")
             .every((v) => item.category.toLowerCase().includes(v));
+        });
+      } else if (this.searchQuery) {
+        return this.tasks.filter((item) => {
+          return this.searchQuery
+            .toLowerCase()
+            .split(" ")
+            .every((v) => item.title.toLowerCase().includes(v));
         });
       } else {
         console.log(this.tasks);
