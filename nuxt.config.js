@@ -1,3 +1,4 @@
+import webpack from "webpack";
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
@@ -27,6 +28,13 @@ export default {
     ],
   },
 
+  loading: {
+    color: "blue",
+    height: "5px",
+  },
+
+  loading: "~/components/LoadingBar.vue",
+
   // Global CSS: https://go.nuxtjs.dev/config-css
   css: ["~/assets/css/main.css"],
 
@@ -43,5 +51,12 @@ export default {
   modules: [],
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
-  build: {},
+  build: {
+    plugins: [
+      new webpack.ProvidePlugin({
+        // global modules
+        _: "lodash",
+      }),
+    ],
+  },
 };

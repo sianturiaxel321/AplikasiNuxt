@@ -19,6 +19,7 @@
       <div class="description-task small text-muted">
         {{ task.description }}
       </div>
+      <input class="form-control form-control-sm" type="date" />
     </div>
     <span v-show="isHide">Task Selesai</span>
   </div>
@@ -31,13 +32,12 @@ export default {
       type: Object,
       default: "Untitled",
     },
-    isGrid: {
+    isHide: {
       type: Boolean,
       required: true,
       default: false,
     },
-
-    isHide: {
+    isGrid: {
       type: Boolean,
       required: true,
       default: false,
