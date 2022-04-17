@@ -1,32 +1,35 @@
 <template>
   <div class="py-4">
-    <div class="container">
+    <div v-if="isLoading">
+      <div class="lds-facebook">
+        <div></div>
+        <div></div>
+        <div></div>
+      </div>
+    </div>
+    <div class="container" v-else>
       <div class="title border-bottom">
         <div
           class="title border-bottom d-flex align-items-center justify-content-between py-2"
         >
           <h5>Task</h5>
-
-          <div class="d-flex align-items-center justify-content-end w-100">
-            <select
-              class="btn btn-outline-primary py-1 px-3 me-2"
-              id="category"
-              name="category"
-              placeholder="asd"
-              v-model="searchCategory"
-            >
+          <div class="d-flex align-items-center ms-auto">
+            <select id="category" name="category" v-model="searchCategory">
+              <option value="">Filter By Kategori</option>
               <option value="Pakaian">Pakaian</option>
               <option value="Aksesoris">Aksesoris</option>
               <option value="Perhiasan">Perhiasan</option>
             </select>
-
-            <button
-              class="btn btn-outline-primary py-1 px-3 me-4"
-              @click="shuffle"
-            >
-              Shuffle!
-            </button>
           </div>
+
+          <div class="d-flex align-items-center ms-auto">
+            <select id="category" name="category" v-model="sortingBy">
+              <option value="">Ascending || Descending</option>
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </div>
+
           <div class="d-flex align-items-center ms-auto">
             <!-- /* Form input pencarian */ -->
             <input
@@ -35,7 +38,6 @@
               placeholder="Search"
               v-model="searchQuery"
             />
-
             <div class="d-flex align-items-center justify-content-end w-100">
               <span class="me-2">View As</span>
               <button
@@ -49,15 +51,15 @@
         </div>
       </div>
 
-      <transition-group name="tasks" tag="div" class="list-task row">
+      <div class="list-task row">
         <CardItem
-          v-for="task in resultQuery"
-          :key="task.id"
+          v-for="(task, i) in resultQuery"
+          :key="i"
           :task="task"
           :isGrid="isGrid"
           :isHide="isHide"
         />
-      </transition-group>
+      </div>
 
       <div class="action py-2">
         <!--* Jika isCreating == false maka tombol Add Task tidak akan tampil */ /*
@@ -71,21 +73,33 @@
         >
         <div class="add-card" v-else>
           <div class="card mb-2">
-            <div class="card-body d-flex flex-column p-0">
-              <input
-                class="form-control border-0 mb-2"
-                placeholder="Title"
-                type="text"
-              />
-              <textarea
-                class="form-control border-0 small"
-                placeholder="Description"
-                rows="3"
-              ></textarea>
-            </div>
+            <form v-on:submit.prevent="formAddTask">
+              <div class="card-body d-flex flex-column p-0">
+                <input
+                  v-model="formAddTask.title"
+                  class="form-control border-0 mb-2"
+                  placeholder="Title"
+                  type="text"
+                />
+                <input
+                  v-model="formAddTask.category"
+                  class="form-control border-0 mb-2"
+                  placeholder="Kategori"
+                  type="text"
+                />
+                <textarea
+                  v-model="formAddTask.description"
+                  class="form-control border-0 small"
+                  placeholder="Description"
+                  rows="3"
+                ></textarea>
+              </div>
+            </form>
           </div>
           <div class="button-wrapper d-flex">
-            <button class="btn btn-primary me-2">Save</button>
+            <button class="btn btn-primary me-2" @click="submitForm">
+              Saves
+            </button>
             <button
               class="btn btn-outline-secondary"
               @click="isCreating = !isCreating"
@@ -108,9 +122,16 @@ export default {
 
   data() {
     return {
+      formAddTask: {
+        title: "",
+        description: "",
+        isDone: false,
+        category: "",
+        isHide: false,
+      },
+
       tasks: [
         {
-          id: 1,
           title: "Baju",
           description: "ini Kategori Pakaian",
           isDone: false,
@@ -118,7 +139,6 @@ export default {
           isHide: false,
         },
         {
-          id: 2,
           title: "Celana",
           description: "ini Kategori Pakaian",
           isDone: false,
@@ -126,7 +146,6 @@ export default {
           isHide: false,
         },
         {
-          id: 3,
           title: "Jam Tangan",
           description: " ini Kategori Aksesoris",
           isDone: false,
@@ -134,7 +153,6 @@ export default {
           isHide: false,
         },
         {
-          id: 4,
           title: "Gelang",
           description: "ini Kategori Aksesoris",
           isDone: false,
@@ -142,7 +160,6 @@ export default {
           isHide: false,
         },
         {
-          id: 5,
           title: "Cincin",
           description: "ini Kategori Perhiasan",
           isDone: false,
@@ -150,7 +167,6 @@ export default {
           isHidden: false,
         },
         {
-          id: 6,
           title: "kalung",
           description: " ini Kategori Perhiasan",
           isDone: false,
@@ -158,7 +174,7 @@ export default {
           isHidden: false,
         },
       ],
-      loading: false,
+      isLoading: true,
       isHide: false,
       isCreating: false,
       isGrid: false,
@@ -166,26 +182,52 @@ export default {
       searchQuery: "",
 
       searchCategory: "",
+      sortingBy: "",
       // Status saat menambahkan task
       isCreating: false,
       // Tipe layout daftar task
     };
   },
-
-  created: function () {
-    console.log(this.tasks);
-    return this.tasks;
+  beforeCreate() {
+    console.log("before created");
+  },
+  created() {
+    console.log(" created");
   },
   beforeMount() {
-    this.$nextTick(() => {
-      this.$nuxt.$loading.start();
-      setTimeout(() => this.$nuxt.$loading.finish(), 5000);
-    });
+    console.log("beforeMount");
   },
-  mounted: function () {
-    setInterval(() => {
-      this.loopTask();
+
+  mounted() {
+    setTimeout(() => {
+      this.isLoading = false;
     }, 3000);
+  },
+  methods: {
+    submitForm() {
+      var myObj = {
+        title: this.formAddTask.title,
+        description: this.formAddTask.description,
+        isDone: false,
+        category: this.formAddTask.category,
+        isHide: false,
+      };
+      // var myObj = {
+      //   title: "Test Title 2",
+      //   description: "Test Description 2",
+      //   isDone: false,
+      //   category: "Test Category 2",
+      //   isHide: false,
+      // };
+      this.tasks.push(myObj);
+      // console.log(this.tasks);
+      return (
+        (this.isCreating = false),
+        (this.formAddTask.title = ""),
+        (this.formAddTask.description = ""),
+        (this.formAddTask.category = "")
+      );
+    },
   },
   computed: {
     resultQuery() {
@@ -203,44 +245,19 @@ export default {
             .split(" ")
             .every((v) => item.title.toLowerCase().includes(v));
         });
+      } else if (this.sortingBy) {
+        // console.log("test");
+        if (this.sortingBy == "asc") {
+          return (this.tasks = _.orderBy(this.tasks, ["title"], ["asc"]));
+          // console.log("asc");
+        } else {
+          return (this.tasks = _.orderBy(this.tasks, ["title"], ["desc"]));
+          // console.log("desc");
+        }
       } else {
         console.log(this.tasks);
         return this.tasks;
       }
-    },
-    sortedArray() {
-      let sortedTasks = this.tasks;
-
-      sortedTasks = sortedTasks.sort((a, b) => {
-        let fa = a.title.toLowerCase(),
-          fb = b.title.toLowerCase();
-        if (fa < fb) {
-          return -1;
-        }
-        if (fa > fb) {
-          return 1;
-        }
-        return 0;
-      });
-    },
-  },
-
-  created() {
-    console.log(
-      "At this point, this.property is now reactive and propertyComputedwill update."
-    );
-    this.property = "Example property updated.";
-  },
-
-  mounted() {
-    this.$nextTick(() => {
-      this.$nuxt.$loading.start();
-      setTimeout(() => this.$nuxt.$loading.finish(), 3000);
-    });
-  },
-  methods: {
-    shuffle() {
-      this.tasks = _.shuffle(this.tasks);
     },
   },
 };
@@ -250,5 +267,45 @@ export default {
 .div h5 {
   font-family: sans;
   color: red;
+}
+
+.lds-facebook {
+  display: inline-block;
+  position: relative;
+  width: 180px;
+  height: 180px;
+  top: 50%;
+  left: 50%;
+}
+.lds-facebook div {
+  display: inline-block;
+  position: absolute;
+  left: 8px;
+  width: 16px;
+  background: rgb(10, 9, 9);
+  animation: lds-facebook 1.2s cubic-bezier(0, 0.5, 0.5, 1) infinite;
+}
+.lds-facebook div:nth-child(1) {
+  left: 8px;
+  animation-delay: -0.24s;
+}
+.lds-facebook div:nth-child(2) {
+  left: 32px;
+  animation-delay: -0.12s;
+}
+.lds-facebook div:nth-child(3) {
+  left: 56px;
+  animation-delay: 0;
+}
+@keyframes lds-facebook {
+  0% {
+    top: 8px;
+    height: 64px;
+  }
+  50%,
+  100% {
+    top: 24px;
+    height: 32px;
+  }
 }
 </style>
