@@ -5,21 +5,28 @@
       isGrid ? 'col-12 col-md-6 col-lg-4' : 'col-12',
     ]"
   >
-    <button
-      class="btn btn-sm btn-secondary py-1 px-3"
-      @click="isHide = !isHide"
-    >
-      {{ isHide ? "SHOW" : "HIDE" }}
-    </button>
+    <input
+      type="checkbox"
+      name="status"
+      id="task"
+      class="me-2 mt-2"
+      :checked="task.isDone"
+      v-model="task.isDone"
+    />
+
     <div v-show="!isHide">
-      <div class="title-task mb-1">
-        {{ task.title }}
-        <span>{{ task.category }}</span>
+      <div class="article-img col-12 d-none d-lg-block">
+        <img :src="task.img" alt="#" />
       </div>
       <div class="description-task small text-muted">
-        {{ task.description }}
+        {{ task.title }}
       </div>
-      <input class="form-control form-control-sm" type="date" />
+      <div class="description-task small text-muted">
+        {{ task.content }}
+      </div>
+      <nuxt-link class="title-task mb-1" :to="'app/detail/' + task.id">
+        Read More
+      </nuxt-link>
     </div>
     <span v-show="isHide">Task Selesai</span>
   </div>
@@ -45,3 +52,8 @@ export default {
   },
 };
 </script>
+<style scoped>
+.article-img img {
+  width: 50%;
+}
+</style>
